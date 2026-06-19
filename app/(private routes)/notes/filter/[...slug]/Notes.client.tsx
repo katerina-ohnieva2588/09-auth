@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNotes } from "@/lib/api";
+import { fetchNotes } from "@/lib/api/clientApi";
+import { notesKey } from "@/lib/queryKeys";
 import NoteList from "@/components/NoteList/NoteList";
 import SearchBox from "@/components/SearchBox/SearchBox";
 import Pagination from "@/components/Pagination/Pagination";
@@ -21,17 +22,26 @@ export default function NotesClient({ tag }: NotesClientProps) {
   const [debouncedSearch] = useDebounce(searchInput, 400);
 
   const perPage = 12;
-  const normalizedTag = tag === "all" ? undefined : tag;
+  const stableTag = tag === "all" ? "" : tag ?? "";
+
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
+    setPage(1);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["notes", { tag: normalizedTag, page, search: debouncedSearch }],
-  queryFn: () =>
-  fetchNotes({
-    page,
-    perPage,
-    search: debouncedSearch,
-    tag: normalizedTag,
-  }),
+    queryKey: notesKey(page, debouncedSearch, perPage, stableTag),
+    queryFn: () =>
+      fetchNotes({
+        page,
+        perPage,
+        search: debouncedSearch,
+        tag: stableTag || undefined,
+      }),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
@@ -42,14 +52,13 @@ export default function NotesClient({ tag }: NotesClientProps) {
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
-        <SearchBox
-        onChange={(value) => {
-          setSearchInput(value);
-          setPage(1);
-          }}
-        />
+        <SearchBox onChange={handleSearchChange} />
 
-        <Pagination page={page} totalPages={totalPages} onChange={setPage} />
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onChange={handlePageChange}
+        />
 
         <Link href="/notes/action/create" className={css.button}>
           Create note +
@@ -57,16 +66,13 @@ export default function NotesClient({ tag }: NotesClientProps) {
       </div>
 
       {isLoading && <p>Loading notes...</p>}
-
       {isError && <p>Something went wrong</p>}
 
       {!isLoading && !isError && notes.length === 0 && (
         <p>No notes found</p>
       )}
 
-      {!isLoading && !isError && notes.length > 0 && (
-        <NoteList notes={notes} />
-      )}
+      {!isLoading && !isError && <NoteList notes={notes} />}
     </div>
   );
 }
