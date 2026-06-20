@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { api } from "./api";
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
+import type { AxiosResponse } from "axios";
 
 const getCookieHeader = async () => {
   const cookieStore = await cookies();
@@ -12,13 +13,23 @@ const getCookieHeader = async () => {
     .join("; ");
 };
 
-export const fetchNotes = async (): Promise<Note[]> => {
+interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: string;
+}
+
+export const fetchNotes = async (
+  params: FetchNotesParams
+): Promise<Note[]> => {
   const Cookie = await getCookieHeader();
 
   const { data } = await api.get("/notes", {
     headers: {
       Cookie,
     },
+    params,
   });
 
   return data;
@@ -48,18 +59,14 @@ export const getMe = async (): Promise<User> => {
   return data;
 };
 
-export const checkSession = async (): Promise<User | null> => {
-  try {
-    const Cookie = await getCookieHeader();
+export const checkSession = async (): Promise<AxiosResponse<User>> => {
+  const Cookie = await getCookieHeader();
 
-    const { data } = await api.get("/auth/session", {
-      headers: {
-        Cookie,
-      },
-    });
+  const response = await api.get<User>("/auth/session", {
+    headers: {
+      Cookie,
+    },
+  });
 
-    return data;
-  } catch {
-    return null;
-  }
+  return response;
 };

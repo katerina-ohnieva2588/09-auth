@@ -45,8 +45,8 @@ export const createNote = async (
 
 export const deleteNote = async (
   id: string
-): Promise<{ message: string }> => {
-  const { data } = await api.delete<{ message: string }>(`/notes/${id}`);
+): Promise<Note> => {
+  const { data } = await api.delete<Note>(`/notes/${id}`);
   return data;
 };
 

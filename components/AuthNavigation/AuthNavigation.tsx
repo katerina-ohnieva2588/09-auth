@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import css from "./AuthNavigation.module.css";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -28,9 +29,9 @@ export default function AuthNavigation() {
       {isAuthenticated ? (
         <>
           <li className={css.navigationItem}>
-            <a href="/profile" className={css.navigationLink}>
+            <Link href="/profile" className={css.navigationLink}>
               Profile
-            </a>
+            </Link>
           </li>
 
           <li className={css.navigationItem}>
@@ -43,15 +44,15 @@ export default function AuthNavigation() {
       ) : (
         <>
           <li className={css.navigationItem}>
-            <a href="/sign-in" className={css.navigationLink}>
+            <Link href="/sign-in" className={css.navigationLink}>
               Login
-            </a>
+            </Link>
           </li>
 
           <li className={css.navigationItem}>
-            <a href="/sign-up" className={css.navigationLink}>
+            <Link href="/sign-up" className={css.navigationLink}>
               Sign up
-            </a>
+            </Link>
           </li>
         </>
       )}

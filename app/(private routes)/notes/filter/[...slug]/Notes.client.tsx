@@ -35,7 +35,6 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
   const { data, isError } = useQuery({
     queryKey: notesKey(page, debouncedSearch ?? "", perPage, stableTag),
-
     queryFn: () =>
       fetchNotes({
         page,
@@ -43,26 +42,28 @@ export default function NotesClient({ tag }: NotesClientProps) {
         search: debouncedSearch,
         tag: stableTag || undefined,
       }),
-
     staleTime: 60_000,
     refetchOnWindowFocus: false,
-
     placeholderData: (prev) => prev,
   });
 
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 1;
 
+  const hasNotes = notes.length > 0;
+
   return (
     <div className={css.app}>
       <div className={css.toolbar}>
         <SearchBox onChange={handleSearchChange} />
 
-        <Pagination
-          page={page}
-          totalPages={totalPages}
-          onChange={handlePageChange}
-        />
+        {hasNotes && (
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            onChange={handlePageChange}
+          />
+        )}
 
         <Link href="/notes/action/create" className={css.button}>
           Create note +
@@ -71,9 +72,9 @@ export default function NotesClient({ tag }: NotesClientProps) {
 
       {isError && <p>Something went wrong</p>}
 
-      {!isError && notes.length === 0 && <p>No notes found</p>}
+      {!isError && !hasNotes && <p>No notes found</p>}
 
-      <NoteList notes={notes} />
+      {hasNotes && <NoteList notes={notes} />}
     </div>
   );
 }
