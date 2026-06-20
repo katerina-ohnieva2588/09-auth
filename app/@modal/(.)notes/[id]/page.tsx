@@ -8,12 +8,12 @@ import { fetchNoteById } from "@/lib/api/serverApi";
 import { noteKey } from "@/lib/queryKeys";
 import NotePreview from "./NotePreview.client";
 
-export default async function Page({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { id } = params;
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
+export default async function Page({ params }: Props) {
+  const { id } = await params;
 
   const queryClient = new QueryClient();
 
