@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useAuthStore } from "@/lib/store/authStore";
-import { getMe } from "@/lib/api/clientApi";
+import { getMe, checkSession } from "@/lib/api/clientApi";
 
 export default function AuthProvider({
   children,
@@ -10,20 +10,21 @@ export default function AuthProvider({
   children: React.ReactNode;
 }) {
   const setUser = useAuthStore((s) => s.setUser);
-  const clear = useAuthStore((s) => s.clearIsAuthenticated);
+  const clearIsAuthenticated = useAuthStore((s) => s.clearIsAuthenticated);
 
   useEffect(() => {
     const init = async () => {
       try {
+        await checkSession();
         const user = await getMe();
         setUser(user);
       } catch {
-        clear();
+        clearIsAuthenticated();
       }
     };
 
     init();
-  }, [setUser, clear]);
+  }, [setUser, clearIsAuthenticated]);
 
   return <>{children}</>;
 }

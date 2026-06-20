@@ -1,17 +1,24 @@
 import { api } from "./api";
+
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
-
-export interface FetchNotesParams {
-  page: number;
-  perPage: number;
-  search?: string;
-  tag?: string;
-}
 
 export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
+}
+
+export interface CreateNotePayload {
+  title: string;
+  content: string;
+  tag: string;
+}
+
+interface FetchNotesParams {
+  page: number;
+  perPage: number;
+  search?: string;
+  tag?: string;
 }
 
 export const fetchNotes = async (
@@ -29,12 +36,6 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   return data;
 };
 
-export interface CreateNotePayload {
-  title: string;
-  content: string;
-  tag: string;
-}
-
 export const createNote = async (
   payload: CreateNotePayload
 ): Promise<Note> => {
@@ -50,7 +51,6 @@ export const deleteNote = async (
 };
 
 export interface RegisterPayload {
-  name: string;
   email: string;
   password: string;
 }
@@ -81,6 +81,9 @@ export const logout = async (): Promise<void> => {
 export const checkSession = async (): Promise<User | null> => {
   try {
     const { data } = await api.get<User>("/auth/session");
+
+    if (!data) return null;
+
     return data;
   } catch {
     return null;
@@ -93,7 +96,7 @@ export const getMe = async (): Promise<User> => {
 };
 
 export const updateMe = async (
-  payload: Partial<User>
+  payload: { username: string }
 ): Promise<User> => {
   const { data } = await api.patch<User>("/users/me", payload);
   return data;

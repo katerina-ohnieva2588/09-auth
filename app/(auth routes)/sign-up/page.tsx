@@ -20,13 +20,11 @@ export default function SignUpPage() {
 
     const formData = new FormData(e.currentTarget);
 
-    const name = String(formData.get("name") || "");
     const email = String(formData.get("email") || "");
     const password = String(formData.get("password") || "");
 
     try {
       const user = await register({
-        name,
         email,
         password,
       });
