@@ -3,6 +3,7 @@ export const notesKey = (
   search: string,
   perPage: number,
   tag?: string
-) => ["notes", page, search, perPage, tag] as const;
+) =>
+  ["notes", page, search || "", perPage, tag || "all"] as const;
 
 export const noteKey = (id: string) => ["note", id] as const;

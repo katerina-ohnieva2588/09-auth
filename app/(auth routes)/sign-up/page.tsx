@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { AxiosError } from "axios";
 
 import css from "./SignUpPage.module.css";
-import { register, getMe } from "@/lib/api/clientApi";
+import { register } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
 
 export default function SignUpPage() {
@@ -20,22 +20,19 @@ export default function SignUpPage() {
 
     const formData = new FormData(e.currentTarget);
 
-    const username = String(formData.get("username"));
-    const email = String(formData.get("email"));
-    const password = String(formData.get("password"));
+    const name = String(formData.get("name") || "");
+    const email = String(formData.get("email") || "");
+    const password = String(formData.get("password") || "");
 
     try {
-      await register({
+      const user = await register({
+        name,
         email,
         password,
-        username,
       });
 
-      const user = await getMe();
       setUser(user);
-
       router.push("/profile");
-      router.refresh();
     } catch (error) {
       const err = error as AxiosError<{ error?: string }>;
 
@@ -53,25 +50,45 @@ export default function SignUpPage() {
 
       <form className={css.form} onSubmit={handleSubmit}>
         <div className={css.formGroup}>
-          <label>Username</label>
-          <input name="username" type="text" className={css.input} required />
+          <label htmlFor="name">Name</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            className={css.input}
+            required
+          />
         </div>
 
         <div className={css.formGroup}>
-          <label>Email</label>
-          <input name="email" type="email" className={css.input} required />
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            className={css.input}
+            required
+          />
         </div>
 
         <div className={css.formGroup}>
-          <label>Password</label>
-          <input name="password" type="password" className={css.input} required />
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            className={css.input}
+            required
+          />
         </div>
 
-        <button type="submit" className={css.submitButton}>
-          Register
-        </button>
+        <div className={css.actions}>
+          <button type="submit" className={css.submitButton}>
+            Register
+          </button>
+        </div>
 
-        {error && <p className={css.error}>{error}</p>}
+        <p className={css.error}>{error}</p>
       </form>
     </main>
   );

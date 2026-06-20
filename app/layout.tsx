@@ -40,11 +40,11 @@ export default function RootLayout({
   return (
     <html lang="uk">
       <body className={roboto.variable}>
-         <TanStackProvider>
+        <TanStackProvider>
           <AuthProvider>
-            <Header />
-            {children}
-            <Footer />
+          <Header />
+          {children}
+          <Footer />
           </AuthProvider>
         </TanStackProvider>
       </body>

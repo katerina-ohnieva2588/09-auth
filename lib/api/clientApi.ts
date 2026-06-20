@@ -1,41 +1,22 @@
 import { api } from "./api";
-
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
 
-
-export interface FetchNotesResponse {
-  notes: Note[];
-  totalPages: number;
-}
-
-export interface CreateNotePayload {
-  title: string;
-  content: string;
-  tag: string;
-}
-
-interface FetchNotesParams {
+export interface FetchNotesParams {
   page: number;
   perPage: number;
   search?: string;
   tag?: string;
 }
 
-export const fetchNotes = async ({
-  page,
-  perPage,
-  search,
-  tag,
-}: FetchNotesParams): Promise<FetchNotesResponse> => {
-  const params: Record<string, string | number> = {
-    page,
-    perPage,
-  };
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+}
 
-  if (search?.trim()) params.search = search.trim();
-  if (tag && tag !== "all") params.tag = tag;
-
+export const fetchNotes = async (
+  params: FetchNotesParams
+): Promise<FetchNotesResponse> => {
   const { data } = await api.get<FetchNotesResponse>("/notes", {
     params,
   });
@@ -47,6 +28,12 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   const { data } = await api.get<Note>(`/notes/${id}`);
   return data;
 };
+
+export interface CreateNotePayload {
+  title: string;
+  content: string;
+  tag: string;
+}
 
 export const createNote = async (
   payload: CreateNotePayload
@@ -63,9 +50,9 @@ export const deleteNote = async (
 };
 
 export interface RegisterPayload {
+  name: string;
   email: string;
   password: string;
-  username: string;
 }
 
 export interface LoginPayload {
@@ -73,30 +60,30 @@ export interface LoginPayload {
   password: string;
 }
 
-export interface SessionResponse {
-  success: boolean;
-}
-
-export const register = async (data: RegisterPayload): Promise<User> => {
-  const { data: user } = await api.post<User>("/auth/register", data);
-  return user;
+export const register = async (
+  payload: RegisterPayload
+): Promise<User> => {
+  const { data } = await api.post<User>("/auth/register", payload);
+  return data;
 };
 
-export const login = async (data: LoginPayload): Promise<User> => {
-  const { data: user } = await api.post<User>("/auth/login", data);
-  return user;
+export const login = async (
+  payload: LoginPayload
+): Promise<User> => {
+  const { data } = await api.post<User>("/auth/login", payload);
+  return data;
 };
 
 export const logout = async (): Promise<void> => {
   await api.post("/auth/logout");
 };
 
-export const checkSession = async (): Promise<boolean> => {
+export const checkSession = async (): Promise<User | null> => {
   try {
-    const { data } = await api.get<SessionResponse>("/auth/session");
-    return data.success;
+    const { data } = await api.get<User>("/auth/session");
+    return data;
   } catch {
-    return false;
+    return null;
   }
 };
 
@@ -106,8 +93,8 @@ export const getMe = async (): Promise<User> => {
 };
 
 export const updateMe = async (
-  data: Partial<User>
+  payload: Partial<User>
 ): Promise<User> => {
-  const { data: user } = await api.patch<User>("/users/me", data);
-  return user;
+  const { data } = await api.patch<User>("/users/me", payload);
+  return data;
 };

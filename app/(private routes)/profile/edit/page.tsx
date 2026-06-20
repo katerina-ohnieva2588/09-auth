@@ -11,31 +11,20 @@ import { updateMe } from "@/lib/api/clientApi";
 export default function EditProfilePage() {
   const router = useRouter();
 
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+  const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
 
-  const [username, setUsername] = useState(user?.username || "");
-  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState(user?.username ?? "");
 
   if (!user) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const updatedUser = await updateMe({ username });
+    const updatedUser = await updateMe({ username });
 
-      setUser(updatedUser);
-      router.push("/profile");
-    } catch (error) {
-      console.error("Update profile failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setUser(updatedUser);
 
-  const handleCancel = () => {
     router.push("/profile");
   };
 
@@ -44,7 +33,7 @@ export default function EditProfilePage() {
       <div className={css.profileCard}>
         <h1 className={css.formTitle}>Edit Profile</h1>
 
-        <img
+        <Image
           src={user.avatar}
           alt="User Avatar"
           width={120}
@@ -67,18 +56,14 @@ export default function EditProfilePage() {
           <p>Email: {user.email}</p>
 
           <div className={css.actions}>
-            <button
-              type="submit"
-              className={css.saveButton}
-              disabled={loading}
-            >
+            <button type="submit" className={css.saveButton}>
               Save
             </button>
 
             <button
               type="button"
               className={css.cancelButton}
-              onClick={handleCancel}
+              onClick={() => router.push("/profile")}
             >
               Cancel
             </button>

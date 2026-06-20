@@ -1,73 +1,57 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-
 import css from "./AuthNavigation.module.css";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/lib/store/authStore";
-import { logout as apiLogout } from "@/lib/api/clientApi";
+import { logout } from "@/lib/api/clientApi";
 
 export default function AuthNavigation() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
-  const { isAuthenticated, user, clearIsAuthenticated } =
-    useAuthStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const clearIsAuthenticated = useAuthStore(
+    (state) => state.clearIsAuthenticated
+  );
 
   const handleLogout = async () => {
-    setLoading(true);
-
     try {
-      await apiLogout();
-    } catch (error) {
-      console.error(error);
+      await logout();
     } finally {
       clearIsAuthenticated();
       router.push("/sign-in");
-      setLoading(false);
     }
   };
 
   return (
     <>
-      {!isAuthenticated ? (
+      {isAuthenticated ? (
         <>
           <li className={css.navigationItem}>
-            <Link href="/sign-in" className={css.navigationLink}>
-              Login
-            </Link>
+            <a href="/profile" className={css.navigationLink}>
+              Profile
+            </a>
           </li>
 
           <li className={css.navigationItem}>
-            <Link href="/sign-up" className={css.navigationLink}>
-              Register
-            </Link>
+            <p className={css.userEmail}>{user?.email}</p>
+            <button className={css.logoutButton} onClick={handleLogout}>
+              Logout
+            </button>
           </li>
         </>
       ) : (
         <>
           <li className={css.navigationItem}>
-            <span className={css.navigationLink}>
-              {user?.email}
-            </span>
+            <a href="/sign-in" className={css.navigationLink}>
+              Login
+            </a>
           </li>
 
           <li className={css.navigationItem}>
-            <Link href="/profile" className={css.navigationLink}>
-              Profile
-            </Link>
-          </li>
-
-          <li className={css.navigationItem}>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className={css.logoutButton}
-              disabled={loading}
-            >
-              {loading ? "Logging out..." : "Logout"}
-            </button>
+            <a href="/sign-up" className={css.navigationLink}>
+              Sign up
+            </a>
           </li>
         </>
       )}

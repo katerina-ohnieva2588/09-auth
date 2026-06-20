@@ -1,11 +1,9 @@
 import css from "./ProfilePage.module.css";
-import { getMe } from "@/lib/api/serverApi";
-import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
+import { getMe } from "@/lib/api/serverApi";
 
-export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Profile",
   description: "User profile page",
 };
@@ -19,13 +17,13 @@ export default async function ProfilePage() {
         <div className={css.header}>
           <h1 className={css.formTitle}>Profile Page</h1>
 
-          <a href="/profile/edit" className={css.editProfileButton}>
+          <Link href="/profile/edit" className={css.editProfileButton}>
             Edit Profile
-          </a>
+          </Link>
         </div>
 
         <div className={css.avatarWrapper}>
-          <img
+          <Image
             src={user.avatar}
             alt="User Avatar"
             width={120}

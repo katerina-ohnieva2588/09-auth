@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import css from "./SignInPage.module.css";
-import { login, getMe } from "@/lib/api/clientApi";
+import { login } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
 
 export default function SignInPage() {
@@ -22,13 +22,10 @@ export default function SignInPage() {
     const password = String(formData.get("password") || "");
 
     try {
-      await login({ email, password });
+      const user = await login({ email, password });
 
-      const user = await getMe();
       setUser(user);
-
       router.push("/profile");
-      router.refresh();
     } catch {
       setError("Invalid email or password");
     }
@@ -41,24 +38,12 @@ export default function SignInPage() {
 
         <div className={css.formGroup}>
           <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            className={css.input}
-            required
-          />
+          <input id="email" type="email" name="email" required />
         </div>
 
         <div className={css.formGroup}>
           <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            className={css.input}
-            required
-          />
+          <input id="password" type="password" name="password" required />
         </div>
 
         <div className={css.actions}>
@@ -67,7 +52,7 @@ export default function SignInPage() {
           </button>
         </div>
 
-        {error && <p className={css.error}>{error}</p>}
+        <p className={css.error}>{error}</p>
       </form>
     </main>
   );

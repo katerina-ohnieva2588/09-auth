@@ -33,8 +33,9 @@ export default function NotesClient({ tag }: NotesClientProps) {
     setPage(newPage);
   };
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: notesKey(page, debouncedSearch, perPage, stableTag),
+  const { data, isError } = useQuery({
+    queryKey: notesKey(page, debouncedSearch ?? "", perPage, stableTag),
+
     queryFn: () =>
       fetchNotes({
         page,
@@ -42,8 +43,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
         search: debouncedSearch,
         tag: stableTag || undefined,
       }),
+
     staleTime: 60_000,
     refetchOnWindowFocus: false,
+
+    placeholderData: (prev) => prev,
   });
 
   const notes = data?.notes ?? [];
@@ -65,14 +69,11 @@ export default function NotesClient({ tag }: NotesClientProps) {
         </Link>
       </div>
 
-      {isLoading && <p>Loading notes...</p>}
       {isError && <p>Something went wrong</p>}
 
-      {!isLoading && !isError && notes.length === 0 && (
-        <p>No notes found</p>
-      )}
+      {!isError && notes.length === 0 && <p>No notes found</p>}
 
-      {!isLoading && !isError && <NoteList notes={notes} />}
+      <NoteList notes={notes} />
     </div>
   );
 }
