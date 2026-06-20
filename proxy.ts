@@ -1,53 +1,65 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 import { checkSession } from "./lib/api/serverApi";
 
 const privateRoutes = ["/profile", "/notes"];
 const publicRoutes = ["/sign-in", "/sign-up"];
 
+const matchRoute = (pathname: string, route: string) =>
+  pathname === route || pathname.startsWith(route + "/");
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const cookieStore = await cookies();
-
-  let accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  let accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
   const isPrivateRoute = privateRoutes.some((route) =>
-    pathname.startsWith(route)
+    matchRoute(pathname, route)
   );
 
   const isPublicRoute = publicRoutes.some((route) =>
-    pathname.startsWith(route)
+    matchRoute(pathname, route)
   );
+
+  const response = NextResponse.next();
 
   const shouldTryRefresh = !accessToken && Boolean(refreshToken);
 
-  if (shouldTryRefresh) {
+  if (shouldTryRefresh && refreshToken) {
     try {
-      const data = await checkSession();
+      const session = await checkSession();
+
+      const data = session.data;
 
       if (data?.accessToken) {
         accessToken = data.accessToken;
 
-        cookieStore.set("accessToken", data.accessToken, {
+        response.cookies.set("accessToken", data.accessToken, {
           httpOnly: true,
           path: "/",
           sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
         });
       }
 
       if (data?.refreshToken) {
-        cookieStore.set("refreshToken", data.refreshToken, {
+        response.cookies.set("refreshToken", data.refreshToken, {
           httpOnly: true,
           path: "/",
           sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
         });
       }
+
+      if (!data) {
+        response.cookies.delete("accessToken");
+        response.cookies.delete("refreshToken");
+        accessToken = undefined;
+      }
     } catch {
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
       accessToken = undefined;
-      cookieStore.delete("accessToken");
-      cookieStore.delete("refreshToken");
     }
   }
 
@@ -59,7 +71,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

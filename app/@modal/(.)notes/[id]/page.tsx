@@ -11,15 +11,16 @@ import NotePreview from "./NotePreview.client";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params;
+  const { id } = params;
 
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: noteKey(id),
     queryFn: () => fetchNoteById(id),
+    staleTime: 1000 * 60,
   });
 
   return (
