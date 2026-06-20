@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { api } from "./api";
 import type { Note } from "@/types/note";
 import type { User } from "@/types/user";
-import type { AxiosResponse } from "axios";
+import type { AuthSession } from "@/types/auth";
 
 const getCookieHeader = async () => {
   const cookieStore = await cookies();
@@ -20,15 +20,11 @@ interface FetchNotesParams {
   tag?: string;
 }
 
-export const fetchNotes = async (
-  params: FetchNotesParams
-): Promise<Note[]> => {
+export const fetchNotes = async (params: FetchNotesParams) => {
   const Cookie = await getCookieHeader();
 
   const { data } = await api.get("/notes", {
-    headers: {
-      Cookie,
-    },
+    headers: { Cookie },
     params,
   });
 
@@ -39,9 +35,7 @@ export const fetchNoteById = async (id: string): Promise<Note> => {
   const Cookie = await getCookieHeader();
 
   const { data } = await api.get(`/notes/${id}`, {
-    headers: {
-      Cookie,
-    },
+    headers: { Cookie },
   });
 
   return data;
@@ -51,22 +45,18 @@ export const getMe = async (): Promise<User> => {
   const Cookie = await getCookieHeader();
 
   const { data } = await api.get("/users/me", {
-    headers: {
-      Cookie,
-    },
+    headers: { Cookie },
   });
 
   return data;
 };
 
-export const checkSession = async (): Promise<AxiosResponse<User>> => {
+export const checkSession = async (): Promise<AuthSession> => {
   const Cookie = await getCookieHeader();
 
-  const response = await api.get<User>("/auth/session", {
-    headers: {
-      Cookie,
-    },
+  const { data } = await api.get<AuthSession>("/auth/session", {
+    headers: { Cookie },
   });
 
-  return response;
+  return data;
 };
